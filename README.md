@@ -113,6 +113,29 @@ You may find more information about installing from COPR here : [COPR Repo](http
 
 You can share your feedback/issues with the COPR packages here: https://github.com/BeardOverflow/msi-ec/discussions/657
 
+#### Building a local RPM
+
+The RPM is an akmod package, so it rebuilds the driver for the installed
+kernel. On Silverblue/Kinoite, build it in a container and layer the resulting
+RPM into the next deployment:
+
+```bash
+make rpm-container
+sudo rpm-ostree install dist/rpmbuild/RPMS/*/akmod-msi-ec-*.rpm dist/rpmbuild/RPMS/*/msi-ec-kmod-common-*.rpm
+systemctl reboot
+```
+
+On mutable Fedora, use the local builder after installing its dependencies:
+
+```bash
+sudo dnf install rpm-build akmods kernel-devel kmodtool gcc make elfutils-libelf-devel
+make rpm
+# Equivalent direct invocation: ./packaging/rpm-akmod/build-rpm.sh
+```
+
+The local and container builders both use the package version from
+`Makefile.vars`.
+
 ### Debian / Alpine / Slackware
 
 Please check our brand new automatically built packages here: https://broadcasts.cloudsmith.com/msi-ec/msi-ec

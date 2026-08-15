@@ -72,5 +72,10 @@ dkms-update: dkms-uninstall dkms-install
 
 dev: modules unload load
 
+.PHONY: rpm rpm-container
+
 rpm:
-	$(MAKE) -C packaging/rpm-akmod/ srpm
+	./packaging/rpm-akmod/build-rpm.sh
+
+rpm-container:
+	./packaging/rpm-akmod/build-rpm-container.sh
