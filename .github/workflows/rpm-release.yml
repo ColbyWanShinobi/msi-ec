@@ -18,11 +18,16 @@ jobs:
           fetch-depth: 0
       - name: Install build tooling
         run: dnf install -y rpm-build akmods kernel-devel kmodtool gcc make elfutils-libelf-devel tar gzip
+      - name: Read package version
+        id: version
+        run: |
+          VERSION="$(sed -n 's/^VERSION[[:space:]]*:=\|^VERSION[[:space:]]*?=//p' Makefile.vars | tr -d '[:space:]')"
+          test -n "$VERSION"
+          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
       - name: Check tag version
         if: github.event_name == 'push'
         run: |
-          VERSION="$(sed -n 's/^VERSION[[:space:]]*:=\|^VERSION[[:space:]]*?=//p' Makefile.vars | tr -d '[:space:]')"
-          test "${GITHUB_REF_NAME#v}" = "$VERSION"
+          test "${GITHUB_REF_NAME#v}" = "${{ steps.version.outputs.value }}"
       - name: Build RPM
         run: ./packaging/rpm-akmod/build-rpm.sh
       - uses: actions/upload-artifact@v4
@@ -30,8 +35,9 @@ jobs:
           name: msi-ec-akmod-rpm
           path: dist/rpmbuild/RPMS/**/*.rpm
       - name: Publish GitHub release
-        if: github.event_name == 'push'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && format('v{0}', steps.version.outputs.value) || github.ref_name }}
+          target_commitish: ${{ github.sha }}
           generate_release_notes: true
           files: dist/rpmbuild/RPMS/**/*.rpm
