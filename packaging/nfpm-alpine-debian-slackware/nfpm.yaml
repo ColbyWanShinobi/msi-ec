@@ -41,10 +41,3 @@ scripts:
 overrides:
   deb:
     depends: [dkms, make, gcc, linux-headers-generic]
-  apk:
-    depends: [dkms, make, gcc, linux-lts-dev]
-  
-  # Using the archlinux preset for slackware as they are really close and there is no official slackware support
-  archlinux:
-    scripts:
-      postinstall: "scripts/postinstall_slackware.sh"
