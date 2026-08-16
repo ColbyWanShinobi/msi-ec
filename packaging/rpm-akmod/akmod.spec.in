@@ -37,8 +37,14 @@ BuildRequires:  akmods
 %{!?kernels:BuildRequires: buildsys-build-rpmfusion-kerneldevpkgs-%{?buildforkernels:%{buildforkernels}}%{!?buildforkernels:current}-%{_target_cpu} }
 %endif
 
-# kmodtool does its magic here
-%{expand:%(kmodtool --target %{_target_cpu} --repo rpmfusion --kmodname %{name} %{?buildforkernels:--%{buildforkernels}} %{?kernels:--for-kernels "%{?kernels}"} 2>/dev/null) }
+# kmodtool does its magic here.  Its generated akmod package contains %post
+# and %posttrans hooks which call akmods as root.  That is not supported by
+# current akmods and causes an RPM transaction failure while composing an
+# OSTree/OCI image.  Keep the generated package payload (the source RPM under
+# /usr/src/akmods) but omit those eager-build hooks.  akmods.service builds the
+# module at first boot and for subsequent kernel updates, in its supported
+# runtime context.
+%{expand:%(kmodtool --target %{_target_cpu} --repo rpmfusion --kmodname %{name} %{?buildforkernels:--%{buildforkernels}} %{?kernels:--for-kernels "%{?kernels}"} 2>/dev/null | sed -e '/^[%%]posttrans[[:space:]].*-n akmod-/,/^$/d' -e '/^[%%]post[[:space:]].*-n akmod-/,/^$/d') }
 
 
 %description

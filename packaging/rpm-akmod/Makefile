@@ -5,7 +5,9 @@ PROJECT_DIR := $(abspath ../..)
 RPM_ROOT   ?= $(PROJECT_DIR)/dist/rpmbuild
 DIST_DIR   := $(MODNAME)-$(VERSION)
 
-RELEASE    ?= 1
+# Increment when the packaging changes without an upstream driver version
+# change, so consumers can request the corrected RPM artifact explicitly.
+RELEASE    ?= 2
 DATE_RPM   := $(shell date -u +"%a %b %d %Y")
 
 .PHONY: srpm clean dist rpm

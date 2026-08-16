@@ -117,7 +117,9 @@ You can share your feedback/issues with the COPR packages here: https://github.c
 
 The RPM is an akmod package, so it rebuilds the driver for the installed
 kernel. On Silverblue/Kinoite, build it in a container and layer the resulting
-RPM into the next deployment:
+RPM into the next deployment. The akmod source is built by `akmods.service` at
+boot (rather than during the RPM transaction), which also makes the package
+safe to include while composing an OSTree/OCI image:
 
 ```bash
 make rpm-container
