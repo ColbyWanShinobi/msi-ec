@@ -17,9 +17,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install build tooling
-        run: dnf install -y rpm-build akmods kernel-devel kmodtool gcc make elfutils-libelf-devel tar gzip golang
-      - name: Install Debian package tooling
-        run: go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
+        run: dnf install -y rpm-build akmods kernel-devel kmodtool gcc make elfutils-libelf-devel tar gzip
       - name: Read package version
         id: version
         run: |
@@ -32,20 +30,14 @@ jobs:
           test "${GITHUB_REF_NAME#v}" = "${{ steps.version.outputs.value }}"
       - name: Build RPM
         run: ./packaging/rpm-akmod/build-rpm.sh
-      - name: Build Debian package
-        run: PATH="$HOME/go/bin:$PATH" make -C packaging/nfpm-alpine-debian-slackware package-all
       - uses: actions/upload-artifact@v4
         with:
           name: msi-ec-akmod-rpm
-          path: |
-            dist/rpmbuild/RPMS/**/*.rpm
-            packaging/nfpm-alpine-debian-slackware/*.deb
+          path: dist/rpmbuild/RPMS/**/*.rpm
       - name: Publish GitHub release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event_name == 'workflow_dispatch' && format('v{0}', steps.version.outputs.value) || github.ref_name }}
           target_commitish: ${{ github.sha }}
           generate_release_notes: true
-          files: |
-            dist/rpmbuild/RPMS/**/*.rpm
-            packaging/nfpm-alpine-debian-slackware/*.deb
+          files: dist/rpmbuild/RPMS/**/*.rpm
